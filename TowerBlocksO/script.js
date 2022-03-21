@@ -12,14 +12,14 @@ class Stage {
         this.remove = function (elem) {
             this.scene.remove(elem);
         };
-        this.container = document.getElementById('game');
+        this.container = document.getElementById("game");
         // renderer
         this.renderer = new THREE.WebGLRenderer({
             antialias: true,
             alpha: false
         });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.renderer.setClearColor('#D0CBC7', 1);
+        this.renderer.setClearColor("#D0CBC7", 1);
         this.container.appendChild(this.renderer.domElement);
         // scene
         this.scene = new THREE.Scene();
@@ -37,11 +37,14 @@ class Stage {
         this.scene.add(this.light);
         this.softLight = new THREE.AmbientLight(0xffffff, 0.4);
         this.scene.add(this.softLight);
-        window.addEventListener('resize', () => this.onResize());
+        window.addEventListener("resize", () => this.onResize());
         this.onResize();
     }
     setCamera(y, speed = 0.3) {
-        TweenLite.to(this.camera.position, speed, { y: y + 4, ease: Power1.easeInOut });
+        TweenLite.to(this.camera.position, speed, {
+            y: y + 4,
+            ease: Power1.easeInOut
+        });
         TweenLite.to(this.camera.lookAt, speed, { y: y, ease: Power1.easeInOut });
     }
     onResize() {
@@ -57,22 +60,30 @@ class Stage {
 class Block {
     constructor(block) {
         // set size and position
-        this.STATES = { ACTIVE: 'active', STOPPED: 'stopped', MISSED: 'missed' };
+        this.STATES = { ACTIVE: "active", STOPPED: "stopped", MISSED: "missed" };
         this.MOVE_AMOUNT = 12;
         this.dimension = { width: 0, height: 0, depth: 0 };
         this.position = { x: 0, y: 0, z: 0 };
         this.targetBlock = block;
         this.index = (this.targetBlock ? this.targetBlock.index : 0) + 1;
-        this.workingPlane = this.index % 2 ? 'x' : 'z';
-        this.workingDimension = this.index % 2 ? 'width' : 'depth';
+        this.workingPlane = this.index % 2 ? "x" : "z";
+        this.workingDimension = this.index % 2 ? "width" : "depth";
         // set the dimensions from the target block, or defaults.
-        this.dimension.width = this.targetBlock ? this.targetBlock.dimension.width : 10;
-        this.dimension.height = this.targetBlock ? this.targetBlock.dimension.height : 2;
-        this.dimension.depth = this.targetBlock ? this.targetBlock.dimension.depth : 10;
+        this.dimension.width = this.targetBlock
+            ? this.targetBlock.dimension.width
+            : 10;
+        this.dimension.height = this.targetBlock
+            ? this.targetBlock.dimension.height
+            : 2;
+        this.dimension.depth = this.targetBlock
+            ? this.targetBlock.dimension.depth
+            : 10;
         this.position.x = this.targetBlock ? this.targetBlock.position.x : 0;
         this.position.y = this.dimension.height * this.index;
         this.position.z = this.targetBlock ? this.targetBlock.position.z : 0;
-        this.colorOffset = this.targetBlock ? this.targetBlock.colorOffset : Math.round(Math.random() * 100);
+        this.colorOffset = this.targetBlock
+            ? this.targetBlock.colorOffset
+            : Math.round(Math.random() * 100);
         // set color
         if (!this.targetBlock) {
             this.color = 0x333344;
@@ -87,18 +98,22 @@ class Block {
         // state
         this.state = this.index > 1 ? this.STATES.ACTIVE : this.STATES.STOPPED;
         // set direction
-        this.speed = -0.1 - (this.index * 0.005);
+        this.speed = -0.1 - this.index * 0.005;
         if (this.speed < -4)
             this.speed = -4;
         this.direction = this.speed;
         // create block
         let geometry = new THREE.BoxGeometry(this.dimension.width, this.dimension.height, this.dimension.depth);
         geometry.applyMatrix(new THREE.Matrix4().makeTranslation(this.dimension.width / 2, this.dimension.height / 2, this.dimension.depth / 2));
-        this.material = new THREE.MeshToonMaterial({ color: this.color, shading: THREE.FlatShading });
+        this.material = new THREE.MeshToonMaterial({
+            color: this.color,
+            shading: THREE.FlatShading
+        });
         this.mesh = new THREE.Mesh(geometry, this.material);
         this.mesh.position.set(this.position.x, this.position.y + (this.state == this.STATES.ACTIVE ? 0 : 0), this.position.z);
         if (this.state == this.STATES.ACTIVE) {
-            this.position[this.workingPlane] = Math.random() > 0.5 ? -this.MOVE_AMOUNT : this.MOVE_AMOUNT;
+            this.position[this.workingPlane] =
+                Math.random() > 0.5 ? -this.MOVE_AMOUNT : this.MOVE_AMOUNT;
         }
     }
     reverseDirection() {
@@ -106,7 +121,9 @@ class Block {
     }
     place() {
         this.state = this.STATES.STOPPED;
-        let overlap = this.targetBlock.dimension[this.workingDimension] - Math.abs(this.position[this.workingPlane] - this.targetBlock.position[this.workingPlane]);
+        let overlap = this.targetBlock.dimension[this.workingDimension] -
+            Math.abs(this.position[this.workingPlane] -
+                this.targetBlock.position[this.workingPlane]);
         let blocksToReturn = {
             plane: this.workingPlane,
             direction: this.direction
@@ -120,7 +137,11 @@ class Block {
             this.dimension.depth = this.targetBlock.dimension.depth;
         }
         if (overlap > 0) {
-            let choppedDimensions = { width: this.dimension.width, height: this.dimension.height, depth: this.dimension.depth };
+            let choppedDimensions = {
+                width: this.dimension.width,
+                height: this.dimension.height,
+                depth: this.dimension.depth
+            };
             choppedDimensions[this.workingDimension] -= overlap;
             this.dimension[this.workingDimension] = overlap;
             let placedGeometry = new THREE.BoxGeometry(this.dimension.width, this.dimension.height, this.dimension.depth);
@@ -134,7 +155,8 @@ class Block {
                 y: this.position.y,
                 z: this.position.z
             };
-            if (this.position[this.workingPlane] < this.targetBlock.position[this.workingPlane]) {
+            if (this.position[this.workingPlane] <
+                this.targetBlock.position[this.workingPlane]) {
                 this.position[this.workingPlane] = this.targetBlock.position[this.workingPlane];
             }
             else {
@@ -165,20 +187,20 @@ class Block {
 class Game {
     constructor() {
         this.STATES = {
-            'LOADING': 'loading',
-            'PLAYING': 'playing',
-            'READY': 'ready',
-            'ENDED': 'ended',
-            'RESETTING': 'resetting'
+            LOADING: "loading",
+            PLAYING: "playing",
+            READY: "ready",
+            ENDED: "ended",
+            RESETTING: "resetting"
         };
         this.blocks = [];
         this.state = this.STATES.LOADING;
         this.stage = new Stage();
-        this.mainContainer = document.getElementById('container');
-        this.scoreContainer = document.getElementById('score');
-        this.startButton = document.getElementById('start-button');
-        this.instructions = document.getElementById('instructions');
-        this.scoreContainer.innerHTML = '0';
+        this.mainContainer = document.getElementById("container");
+        this.scoreContainer = document.getElementById("score");
+        this.startButton = document.getElementById("start-button");
+        this.instructions = document.getElementById("instructions");
+        this.scoreContainer.innerHTML = "0";
         this.newBlocks = new THREE.Group();
         this.placedBlocks = new THREE.Group();
         this.choppedBlocks = new THREE.Group();
@@ -188,14 +210,14 @@ class Game {
         this.addBlock();
         this.tick();
         this.updateState(this.STATES.READY);
-        document.addEventListener('keydown', e => {
+        document.addEventListener("keydown", (e) => {
             if (e.keyCode == 32)
                 this.onAction();
         });
-        document.addEventListener('click', e => {
+        document.addEventListener("click", (e) => {
             this.onAction();
         });
-        document.addEventListener('touchstart', e => {
+        document.addEventListener("touchstart", (e) => {
             e.preventDefault();
             // this.onAction();
             // ☝️ this triggers after click on android so you
@@ -223,7 +245,7 @@ class Game {
     }
     startGame() {
         if (this.state != this.STATES.PLAYING) {
-            this.scoreContainer.innerHTML = '0';
+            this.scoreContainer.innerHTML = "0";
             this.updateState(this.STATES.PLAYING);
             this.addBlock();
         }
@@ -234,13 +256,29 @@ class Game {
         let removeSpeed = 0.2;
         let delayAmount = 0.02;
         for (let i = 0; i < oldBlocks.length; i++) {
-            TweenLite.to(oldBlocks[i].scale, removeSpeed, { x: 0, y: 0, z: 0, delay: (oldBlocks.length - i) * delayAmount, ease: Power1.easeIn, onComplete: () => this.placedBlocks.remove(oldBlocks[i]) });
-            TweenLite.to(oldBlocks[i].rotation, removeSpeed, { y: 0.5, delay: (oldBlocks.length - i) * delayAmount, ease: Power1.easeIn });
+            TweenLite.to(oldBlocks[i].scale, removeSpeed, {
+                x: 0,
+                y: 0,
+                z: 0,
+                delay: (oldBlocks.length - i) * delayAmount,
+                ease: Power1.easeIn,
+                onComplete: () => this.placedBlocks.remove(oldBlocks[i])
+            });
+            TweenLite.to(oldBlocks[i].rotation, removeSpeed, {
+                y: 0.5,
+                delay: (oldBlocks.length - i) * delayAmount,
+                ease: Power1.easeIn
+            });
         }
-        let cameraMoveSpeed = removeSpeed * 2 + (oldBlocks.length * delayAmount);
+        let cameraMoveSpeed = removeSpeed * 2 + oldBlocks.length * delayAmount;
         this.stage.setCamera(2, cameraMoveSpeed);
         let countdown = { value: this.blocks.length - 1 };
-        TweenLite.to(countdown, cameraMoveSpeed, { value: 0, onUpdate: () => { this.scoreContainer.innerHTML = String(Math.round(countdown.value)); } });
+        TweenLite.to(countdown, cameraMoveSpeed, {
+            value: 0,
+            onUpdate: () => {
+                this.scoreContainer.innerHTML = String(Math.round(countdown.value));
+            }
+        });
         this.blocks = this.blocks.slice(0, 1);
         setTimeout(() => {
             this.startGame();
@@ -254,19 +292,28 @@ class Game {
             this.placedBlocks.add(newBlocks.placed);
         if (newBlocks.chopped) {
             this.choppedBlocks.add(newBlocks.chopped);
-            let positionParams = { y: '-=30', ease: Power1.easeIn, onComplete: () => this.choppedBlocks.remove(newBlocks.chopped) };
+            let positionParams = {
+                y: "-=30",
+                ease: Power1.easeIn,
+                onComplete: () => this.choppedBlocks.remove(newBlocks.chopped)
+            };
             let rotateRandomness = 10;
             let rotationParams = {
                 delay: 0.05,
-                x: newBlocks.plane == 'z' ? ((Math.random() * rotateRandomness) - (rotateRandomness / 2)) : 0.1,
-                z: newBlocks.plane == 'x' ? ((Math.random() * rotateRandomness) - (rotateRandomness / 2)) : 0.1,
-                y: Math.random() * 0.1,
+                x: newBlocks.plane == "z"
+                    ? Math.random() * rotateRandomness - rotateRandomness / 2
+                    : 0.1,
+                z: newBlocks.plane == "x"
+                    ? Math.random() * rotateRandomness - rotateRandomness / 2
+                    : 0.1,
+                y: Math.random() * 0.1
             };
-            if (newBlocks.chopped.position[newBlocks.plane] > newBlocks.placed.position[newBlocks.plane]) {
-                positionParams[newBlocks.plane] = '+=' + (40 * Math.abs(newBlocks.direction));
+            if (newBlocks.chopped.position[newBlocks.plane] >
+                newBlocks.placed.position[newBlocks.plane]) {
+                positionParams[newBlocks.plane] = "+=" + 40 * Math.abs(newBlocks.direction);
             }
             else {
-                positionParams[newBlocks.plane] = '-=' + (40 * Math.abs(newBlocks.direction));
+                positionParams[newBlocks.plane] = "-=" + 40 * Math.abs(newBlocks.direction);
             }
             TweenLite.to(newBlocks.chopped.position, 1, positionParams);
             TweenLite.to(newBlocks.chopped.rotation, 1, rotationParams);
@@ -284,7 +331,7 @@ class Game {
         this.blocks.push(newKidOnTheBlock);
         this.stage.setCamera(this.blocks.length * 2);
         if (this.blocks.length >= 5)
-            this.instructions.classList.add('hide');
+            this.instructions.classList.add("hide");
     }
     endGame() {
         this.updateState(this.STATES.ENDED);
@@ -292,7 +339,9 @@ class Game {
     tick() {
         this.blocks[this.blocks.length - 1].tick();
         this.stage.render();
-        requestAnimationFrame(() => { this.tick(); });
+        requestAnimationFrame(() => {
+            this.tick();
+        });
     }
 }
 let game = new Game();
